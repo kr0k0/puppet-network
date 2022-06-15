@@ -759,9 +759,10 @@ define network::interface (
       } else {
         if ! defined(Concat['/etc/network/interfaces']) {
           concat { '/etc/network/interfaces':
-            mode  => '0644',
-            owner => 'root',
-            group => 'root',
+            mode   => '0644',
+            owner  => 'root',
+            group  => 'root',
+            notify => $network_notify,
           }
         }
 
@@ -771,19 +772,13 @@ define network::interface (
           order   => $manage_order,
         }
 
-        if $restart_all_nic == true and $network::manage_config_file_notify != undef {
-          Concat['/etc/network/interfaces'] ~> Exec['network_restart']
-        } else {
-          Concat['/etc/network/interfaces'] ~> Exec <| title == "network_restart_${name}" |>
-        }
       }
 
       if ! defined(Network::Interface['lo']) {
         network::interface { 'lo':
-          address         => '127.0.0.1',
-          method          => 'loopback',
-          manage_order    => '05',
-          restart_all_nic => $restart_all_nic,
+          address      => '127.0.0.1',
+          method       => 'loopback',
+          manage_order => '05',
         }
       }
     }
